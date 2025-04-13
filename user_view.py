@@ -1,14 +1,22 @@
 import tkinter as tk
 from tkinter import messagebox
 from auth import *
-# from user import User
-# Assuming User class is defined in user.py
+
+root = tk.Tk()
+root.title("SPMS")
+root.geometry("400x300")
+
+main_frame = tk.Frame(root)
+main_frame.pack(expand=True, fill="both")
+
+def clear_frame():
+    for widget in main_frame.winfo_children():
+        widget.destroy()
+
 def login():
     username = username_entry.get()
     password = password_entry.get()
     role = authenticate(username, password)
-
-#hello
 
     if role:
         user = get_user_details(username)
@@ -20,102 +28,94 @@ def login():
         messagebox.showerror("Login Failed", "Invalid username or password.")
 
 def admin_dashboard(user):
+    clear_frame()
+    tk.Label(main_frame, text=f"Welcome {user.full_name}").pack(pady=10)
+    
     def add_ui():
-        def submit():
-            u = u_entry.get()
-            f = f_entry.get()
-            p = p_entry.get()
-            r = role_var.get()
-            if add_user(u, f, p, r):
-                messagebox.showinfo("Success", "User added!")
-                win.destroy()
-            else:
-                messagebox.showerror("Failed", "User already exists.")
-        win = tk.Toplevel()
-        win.title("Add User")
-        tk.Label(win, text="Username").pack()
-        u_entry = tk.Entry(win)
+        clear_frame()
+        tk.Label(main_frame, text="Add User").pack()
+        tk.Label(main_frame, text="Username").pack()
+        u_entry = tk.Entry(main_frame)
         u_entry.pack()
-        tk.Label(win, text="Full Name").pack()
-        f_entry = tk.Entry(win)
+        tk.Label(main_frame, text="Full Name").pack()
+        f_entry = tk.Entry(main_frame)
         f_entry.pack()
-        tk.Label(win, text="Password").pack()
-        p_entry = tk.Entry(win, show="*")
+        tk.Label(main_frame, text="Password").pack()
+        p_entry = tk.Entry(main_frame, show="*")
         p_entry.pack()
         role_var = tk.StringVar(value="student")
-        tk.OptionMenu(win, role_var, "admin", "student").pack()
-        tk.Button(win, text="Submit", command=submit).pack()
+        tk.OptionMenu(main_frame, role_var, "admin", "student").pack()
+        def submit():
+            if add_user(u_entry.get(), f_entry.get(), p_entry.get(), role_var.get()):
+                messagebox.showinfo("Success", "User added!")
+                admin_dashboard(user)
+            else:
+                messagebox.showerror("Failed", "User already exists.")
+        tk.Button(main_frame, text="Submit", command=submit).pack()
+        tk.Button(main_frame, text="Back", command=lambda: admin_dashboard(user)).pack(pady=5)
 
     def delete_ui():
+        clear_frame()
+        tk.Label(main_frame, text="Delete User").pack()
+        entry = tk.Entry(main_frame)
+        entry.pack()
         def submit():
-            u = entry.get()
-            if delete_user(u):
+            if delete_user(entry.get()):
                 messagebox.showinfo("Deleted", "User deleted.")
-                win.destroy()
+                admin_dashboard(user)
             else:
                 messagebox.showerror("Error", "User not found.")
-        win = tk.Toplevel()
-        win.title("Delete User")
-        tk.Label(win, text="Username").pack()
-        entry = tk.Entry(win)
-        entry.pack()
-        tk.Button(win, text="Delete", command=submit).pack()
+        tk.Button(main_frame, text="Delete", command=submit).pack()
+        tk.Button(main_frame, text="Back", command=lambda: admin_dashboard(user)).pack(pady=5)
 
-    win = tk.Toplevel()
-    win.title("Admin Dashboard")
-    tk.Label(win, text=f"Welcome {user.full_name}").pack(pady=10)
-    tk.Button(win, text="Add User", command=add_ui).pack(pady=5)
-    tk.Button(win, text="Delete User", command=delete_ui).pack(pady=5)
+    tk.Button(main_frame, text="Add User", command=add_ui).pack(pady=5)
+    tk.Button(main_frame, text="Delete User", command=delete_ui).pack(pady=5)
 
 def student_dashboard(user):
+    clear_frame()
+    tk.Label(main_frame, text=f"Welcome {user.full_name}").pack()
+
     def view_info():
+        clear_frame()
         grades = get_student_grades(user.username)
         eca = get_student_eca(user.username)
-        win = tk.Toplevel()
-        win.title("Student Info")
-        tk.Label(win, text=f"Name: {user.full_name}").pack()
-        tk.Label(win, text="Grades:").pack()
+        tk.Label(main_frame, text=f"Name: {user.full_name}").pack()
+        tk.Label(main_frame, text="Grades:").pack()
         for g in grades:
-            tk.Label(win, text=f"- {g}").pack()
-        tk.Label(win, text="ECA:").pack()
+            tk.Label(main_frame, text=f"- {g}").pack()
+        tk.Label(main_frame, text="ECA:").pack()
         for act in eca:
-            tk.Label(win, text=f"- {act}").pack()
+            tk.Label(main_frame, text=f"- {act}").pack()
+        tk.Button(main_frame, text="Back", command=lambda: student_dashboard(user)).pack(pady=5)
 
     def update_info():
-        def submit():
-            new_name = name_entry.get()
-            if update_student_profile(user.username, new_name):
-                messagebox.showinfo("Updated", "Profile updated.")
-                win.destroy()
-        win = tk.Toplevel()
-        win.title("Update Info")
-        tk.Label(win, text="New Full Name").pack()
-        name_entry = tk.Entry(win)
+        clear_frame()
+        tk.Label(main_frame, text="Update Profile").pack()
+        name_entry = tk.Entry(main_frame)
         name_entry.insert(0, user.full_name)
         name_entry.pack()
-        tk.Button(win, text="Submit", command=submit).pack()
+        def submit():
+            if update_student_profile(user.username, name_entry.get()):
+                messagebox.showinfo("Updated", "Profile updated.")
+                user.full_name = name_entry.get()
+                student_dashboard(user)
+        tk.Button(main_frame, text="Submit", command=submit).pack()
+        tk.Button(main_frame, text="Back", command=lambda: student_dashboard(user)).pack(pady=5)
 
-    win = tk.Toplevel()
-    win.title("Student Dashboard")
-    tk.Label(win, text=f"Welcome {user.full_name}").pack()
-    tk.Button(win, text="View Info", command=view_info).pack()
-    tk.Button(win, text="Update Info", command=update_info).pack()
+    tk.Button(main_frame, text="View Info", command=view_info).pack(pady=5)
+    tk.Button(main_frame, text="Update Info", command=update_info).pack(pady=5)
 
-def main():
+def show_login():
+    clear_frame()
     global username_entry, password_entry
-    root = tk.Tk()
-    root.title("SPMS Login")
-    root.geometry("300x250")
-    frame = tk.Frame(root)
-    frame.pack(expand=True)
-    tk.Label(frame, text="Username").pack(pady=5)
-    username_entry = tk.Entry(frame)
+    tk.Label(main_frame, text="Username").pack(pady=5)
+    username_entry = tk.Entry(main_frame)
     username_entry.pack(pady=5)
-    tk.Label(frame, text="Password").pack(pady=5)
-    password_entry = tk.Entry(frame, show="*")
+    tk.Label(main_frame, text="Password").pack(pady=5)
+    password_entry = tk.Entry(main_frame, show="*")
     password_entry.pack(pady=5)
-    tk.Button(frame, text="Login", command=login).pack(pady=10)
-    root.mainloop()
+    tk.Button(main_frame, text="Login", command=login).pack(pady=10)
 
 if __name__ == "__main__":
-    main()
+    show_login()
+    root.mainloop()
