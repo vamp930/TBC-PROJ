@@ -8,6 +8,8 @@ def login():
     password = password_entry.get()
     role = authenticate(username, password)
 
+#hello
+
     if role:
         user = get_user_details(username)
         if role == "admin":
