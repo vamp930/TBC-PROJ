@@ -1,7 +1,8 @@
 import tkinter as tk
 from tkinter import messagebox
 from auth import *
-
+# from user import User
+# Assuming User class is defined in user.py
 def login():
     username = username_entry.get()
     password = password_entry.get()
@@ -116,8 +117,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-# This code is a simple GUI application for a Student Profile Management System (SPMS).
-# It allows users to log in as either an admin or a student and provides different functionalities based on the role.
-# The admin can add or delete users, while the student can view and update their information.
-# The application uses the Tkinter library for the GUI and includes functions for user authentication,
-# user management, and data retrieval from text files.
