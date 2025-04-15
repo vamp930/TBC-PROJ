@@ -1,7 +1,7 @@
 import tkinter as tk
 from tkinter import messagebox
 from auth import *
-
+#idk
 root = tk.Tk()
 root.title("SPMS")
 root.geometry("400x300")
